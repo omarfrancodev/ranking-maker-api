@@ -43,6 +43,13 @@ INSTALLED_APPS = [
     ## Dependencies apps
     'rest_framework',
     
+    ## My apps
+    'users',
+    'content',
+    'categories',
+    'rankings',
+    'viewings',
+    
 ]
 
 MIDDLEWARE = [

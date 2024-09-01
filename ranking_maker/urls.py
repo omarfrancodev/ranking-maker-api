@@ -17,9 +17,19 @@ Including another URLconf
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from users.views import PersonViewSet
+from categories.views import CategoryViewSet, SubcategoryViewSet
+from content.views import ContentViewSet
+from viewings.views import ViewingViewSet
+from rankings.views import RankingHeaderViewSet
 
 router = DefaultRouter()
 router.register(r'persons', PersonViewSet)
+router.register(r'categories', CategoryViewSet)
+router.register(r'subcategories', SubcategoryViewSet)
+router.register(r'contents', ContentViewSet)
+router.register(r'viewings', ViewingViewSet)
+router.register(r'rankings', RankingHeaderViewSet)
+
 
 url_api = 'api/'
 

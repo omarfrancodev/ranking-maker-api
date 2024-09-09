@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from content.serializers import ContentListSerializer
 from .models import RankingHeader, RankingItem
 from users.models import Person
 from categories.models import Category, Subcategory
@@ -6,43 +8,50 @@ from content.models import Content
 
 
 class RankingItemSerializer(serializers.ModelSerializer):
-    content = serializers.PrimaryKeyRelatedField(
+    content = ContentListSerializer(read_only=True)
+    content_id = serializers.PrimaryKeyRelatedField(
         queryset=Content.objects.all())
 
     class Meta:
         model = RankingItem
-        fields = ['id', 'content', 'rank']
+        fields = ['id', 'content', 'content_id', 'rank']
 
 
 class RankingHeaderSerializer(serializers.ModelSerializer):
-    person = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all())
-    category = serializers.PrimaryKeyRelatedField(
+    person_id = serializers.PrimaryKeyRelatedField(
+        queryset=Person.objects.all())
+    category_id = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all())
-    subcategory = serializers.PrimaryKeyRelatedField(
+    subcategory_id = serializers.PrimaryKeyRelatedField(
         queryset=Subcategory.objects.all())
     ranking_items = serializers.ListSerializer(child=RankingItemSerializer())
 
     class Meta:
         model = RankingHeader
-        fields = ['id', 'person', 'category', 'subcategory', 'ranking_items']
+        fields = ['id', 'person_id', 'category_id',
+                  'subcategory_id', 'ranking_items']
 
     def validate(self, data):
         person = data.get('person')
         category = data.get('category')
         subcategory = data.get('subcategory')
 
+        print('person: ', person, 'category: ',
+              category, 'subcategory: ', subcategory)
+
         valid_contents = Content.objects.filter(
-            viewing__person=person,
-            viewing__category=category,
-            viewing__subcategories=subcategory
+            viewings__person=person,
+            category=category,
+            subcategories=subcategory
         ).distinct()
+        print(valid_contents)
 
         for item in data.get('ranking_items', []):
             content = item.get('content')
             if content not in valid_contents:
                 raise serializers.ValidationError({
                     'ranking_items': [{
-                        'content': f"The content'{content}' is not valid for the category and subcategory selected."
+                        'content': f"El contenido '{content}' no es válido para la categoría y subcategoría seleccionadas."
                     }]
                 })
 
@@ -76,9 +85,9 @@ class RankingHeaderSerializer(serializers.ModelSerializer):
             instance.ranking_items.all().delete()
 
             valid_contents = Content.objects.filter(
-                viewing__person=instance.person,
-                viewing__category=instance.category,
-                viewing__subcategories=instance.subcategory
+                viewings__person=instance.person,
+                category=instance.category,
+                subcategories=instance.subcategory
             ).distinct()
 
             for item_data in items_data:

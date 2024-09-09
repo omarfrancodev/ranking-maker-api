@@ -1,22 +1,53 @@
 from rest_framework import serializers
 from .models import Category, Subcategory
 
+
 class SubcategorySerializer(serializers.ModelSerializer):
-    category_id = serializers.UUIDField(source='category.id', read_only=True)
-    category_name = serializers.CharField(source='category.name', read_only=True)
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all())
 
     class Meta:
         model = Subcategory
-        fields = ['id', 'name', 'category_id', 'category_name']
+        fields = ['id', 'name', 'category']
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=Subcategory.objects.all(),
+                fields=['name', 'category'],
+                message="Ya existe una subcategoría con este nombre en la categoría seleccionada."
+            )
+        ]
 
-    def validate(self, data):
-        if Subcategory.objects.filter(name=data['name'], category=data['category']).exists():
-            raise serializers.ValidationError("A subcategory with this name already exists in the selected category.")
-        return data
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
 
-class CategorySerializer(serializers.ModelSerializer):
-    subcategories = SubcategorySerializer(many=True, read_only=True)
+        representation['category'] = {
+            'category_id': instance.category.id,
+            'name': instance.category.name
+        }
+        return representation
+
+
+class SubcategoryReadOnlySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subcategory
+        fields = ['id', 'name']
+
+
+class CategoryDetailSerializer(serializers.ModelSerializer):
+    subcategories = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
         fields = ['id', 'name', 'subcategories']
+
+    def get_subcategories(self, obj):
+        return [
+            {'subcategory_id': str(sub.id), 'name': sub.name}
+            for sub in obj.subcategories.all()
+        ]
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name']

@@ -3,9 +3,10 @@ from rest_framework.response import Response
 from rest_framework import status
 import datetime
 
+
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
-    
+
     exception_type = type(exc).__name__
     exception_value = str(exc)
     request_method = context['request'].method
@@ -14,14 +15,13 @@ def custom_exception_handler(exc, context):
 
     if response is not None:
         view = context.get('view', None)
-        message = "There was an error processing the request."
+        message = "Se ha producido un error al procesar la solicitud."
         if view:
-            message = f"Error processing {request_method} request for {view.get_view_name()}."
-        
+            message = f"Error al procesar la petición {request_method} para {view.get_view_name()}."
+
         custom_response = {
             'status': response.status_code,
             'data': {
-                "error": "An error has occurred",
                 "exception_type": exception_type,
                 "request_method": request_method,
                 "request_url": request_url,
@@ -35,12 +35,11 @@ def custom_exception_handler(exc, context):
     return Response({
         'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
         'data': {
-            "error": "An internal server error occurred.",
             "exception_type": exception_type,
             "request_method": request_method,
             "request_url": request_url,
             "server_time": server_time,
             "details": exception_value,
         },
-        'message': 'An internal server error occurred.'
+        'message': 'Se ha producido un error interno del servidor.'
     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

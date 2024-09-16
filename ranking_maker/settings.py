@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Dependencies apps
     "rest_framework",
+	"corsheaders",
     # My apps
     "users",
     "content",
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+	"corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -60,6 +62,11 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "ranking_maker.urls"
+
+CORS_ORIGIN_ALLOW_ALL = True  # Si quieres permitir todos los orígenes
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:3000",  # Reemplaza con la URL de tu frontend
+]
 
 TEMPLATES = [
     {

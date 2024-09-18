@@ -41,7 +41,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-	"corsheaders.middleware.CorsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -55,6 +55,8 @@ MIDDLEWARE = [
 ROOT_URLCONF = "ranking_maker.urls"
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = ALLOWED_HOSTS
+CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
 
 TEMPLATES = [
     {
